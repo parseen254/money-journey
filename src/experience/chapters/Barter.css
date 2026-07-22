@@ -1,0 +1,76 @@
+.barter-scale {
+  width: clamp(12rem, 24vw, 17rem);
+  margin: 0.8rem 0 0;
+  color: var(--color-bone-dim);
+}
+
+.barter-scale svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.barter-scale-mast,
+.barter-scale-foot,
+.barter-scale-beam,
+.barter-scale-finial,
+.barter-scale-pan line,
+.barter-scale-pan path {
+  fill: none;
+  stroke: currentColor;
+  vector-effect: non-scaling-stroke;
+}
+
+.barter-scale-mast,
+.barter-scale-foot {
+  stroke-width: 0.8;
+  opacity: 0.55;
+}
+
+.barter-scale-beam,
+.barter-scale-finial {
+  stroke: var(--color-amber-bright);
+  stroke-width: 1.2;
+}
+
+.barter-scale-pan line {
+  stroke-width: 0.7;
+  opacity: 0.72;
+}
+
+.barter-scale-pan path {
+  stroke: var(--color-teal-bright);
+  stroke-width: 1;
+}
+
+.barter-scale-hub {
+  fill: var(--color-amber);
+}
+
+.barter-scale figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-bone) 22%, transparent);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--color-bone-dim);
+}
+
+.barter-scale figcaption span:last-child {
+  color: var(--color-teal-bright);
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .barter-scale {
+    width: min(100%, 15rem);
+  }
+
+  .barter-scale figcaption {
+    letter-spacing: 0.14em;
+  }
+}

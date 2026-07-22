@@ -1,0 +1,54 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-obsidian: #0a0a0c;
+  --color-carbon: #131318;
+  --color-bone: #e8e4da;
+  --color-bone-dim: #a39e92;
+  --color-teal: #2ea3a6;
+  --color-teal-bright: #7fd1d4;
+  --color-amber: #d9a441;
+  --color-amber-bright: #f0c87a;
+  --font-display: 'Fraunces Variable', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+:root {
+  /* 0 → 1 total journey progress, written by the scroll engine */
+  --journey: 0;
+  color-scheme: dark;
+}
+
+html {
+  background: var(--color-obsidian);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-mono);
+  color: var(--color-bone);
+  /* No background here: an opaque body box would paint over the fixed
+     negative-z video layer. The obsidian base lives on html (canvas). */
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-amber) 40%, transparent);
+  color: var(--color-bone);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
