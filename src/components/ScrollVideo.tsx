@@ -14,12 +14,22 @@ const SEEK_EPSILON = 1 / 60
 const PARALLAX_SHIFT = 12
 const PARALLAX_SCALE = 1.05
 
-export default function ScrollVideo({ src }: { src: string }) {
+/** Pick the light 720p cut on phones, small screens, or data-saver — the whole
+ *  file must buffer for smooth scrubbing, so a lean source matters on mobile. */
+function pickSource(src: string, mobileSrc?: string): string {
+  if (!mobileSrc || typeof window === 'undefined') return src
+  const smallOrTouch = window.matchMedia('(max-width: 900px), (pointer: coarse)').matches
+  const conn = (navigator as unknown as { connection?: { saveData?: boolean } }).connection
+  return smallOrTouch || conn?.saveData ? mobileSrc : src
+}
+
+export default function ScrollVideo({ src, mobileSrc }: { src: string; mobileSrc?: string }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const frameRef = useRef<HTMLDivElement>(null)
   const bufferedRef = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
+  const resolvedSrc = useRef(pickSource(src, mobileSrc)).current
 
   useEffect(() => {
     const video = videoRef.current
@@ -126,7 +136,7 @@ export default function ScrollVideo({ src }: { src: string }) {
       // Intentionally leave video.src untouched: StrictMode re-runs this
       // effect and stripping the source would force a full re-download.
     }
-  }, [src])
+  }, [resolvedSrc])
 
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden bg-obsidian" aria-hidden="true">
@@ -134,7 +144,7 @@ export default function ScrollVideo({ src }: { src: string }) {
         {!failed && (
           <video
             ref={videoRef}
-            src={src}
+            src={resolvedSrc}
             className="h-full w-full object-cover"
             muted
             playsInline

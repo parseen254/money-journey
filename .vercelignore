@@ -1,0 +1,4 @@
+clips/
+build/
+node_modules/
+*.log

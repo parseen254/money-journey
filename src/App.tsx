@@ -14,7 +14,7 @@ export default function App() {
           path="/"
           element={
             <>
-              <ScrollVideo src="/media/journey.mp4" />
+              <ScrollVideo src="/media/journey.mp4" mobileSrc="/media/journey-mobile.mp4" />
               <ScrollAudio />
               <Experience />
               <AutoTour />
