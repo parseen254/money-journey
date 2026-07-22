@@ -22,16 +22,21 @@ done
 printf "file 'norm-%d.mp4'\n" 1 2 3 4 5 6 > build/concat.txt
 ffmpeg -y -v error -f concat -safe 0 -i build/concat.txt -c copy build/journey-24.mp4
 
+# Final web encode: high-quality but compressed. CRF 19 + slower preset keeps
+# scrub-frame detail; maxrate cap protects mobile; faststart for streaming.
+WEB_OPTS=(-c:v libx264 -preset slower -crf 19 -maxrate 8M -bufsize 12M \
+  -pix_fmt yuv420p -movflags +faststart -an)
+
 if [[ "${1:-}" == "--fast" ]]; then
-  ffmpeg -y -v error -i build/journey-24.mp4 -vf "fps=60" \
-    -c:v libx264 -preset medium -crf 18 -pix_fmt yuv420p -movflags +faststart -an \
+  ffmpeg -y -v error -i build/journey-24.mp4 -vf "fps=60" "${WEB_OPTS[@]}" \
     public/media/journey.mp4
 else
   ffmpeg -y -i build/journey-24.mp4 \
     -vf "minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:vsbmc=1" \
-    -c:v libx264 -preset slow -crf 18 -pix_fmt yuv420p -movflags +faststart -an \
-    public/media/journey.mp4
+    "${WEB_OPTS[@]}" public/media/journey.mp4
 fi
+
+du -h public/media/journey.mp4
 
 ffprobe -v error -show_entries format=duration -of csv=p=0 public/media/journey.mp4 |
   xargs printf "journey.mp4 assembled: %ss\n"
