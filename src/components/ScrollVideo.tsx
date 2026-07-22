@@ -152,6 +152,18 @@ export default function ScrollVideo({ src }: { src: string }) {
         )}
       </div>
 
+      {/* Readability veil: the film runs bright (dawn, fluorescent halls, gold),
+          so a fixed darkening layer + vignette keeps chrome text legible over
+          any frame without hiding the footage. Sits above the video, still
+          inside the -z-10 background layer so page content stays on top. */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(8,8,11,0.42) 0%, rgba(8,8,11,0.20) 26%, rgba(8,8,11,0.30) 62%, rgba(8,8,11,0.62) 100%), radial-gradient(ellipse 90% 80% at 50% 42%, transparent 42%, rgba(8,8,11,0.5) 100%)',
+        }}
+      />
+
       {/* Restrained loading overlay with buffered progress */}
       <div
         className={`absolute inset-0 flex flex-col items-center justify-center gap-4 bg-obsidian transition-opacity duration-700 ${

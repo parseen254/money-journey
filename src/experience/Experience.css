@@ -17,6 +17,9 @@
   align-items: baseline;
   justify-content: space-between;
   padding: 1.1rem 1.5rem;
+  text-shadow:
+    0 1px 2px rgba(6, 6, 9, 0.7),
+    0 2px 14px rgba(6, 6, 9, 0.55);
 }
 
 .exp-header::before {
@@ -78,6 +81,23 @@
   transform: translateY(-50%);
   font-size: 9px;
   letter-spacing: 0.2em;
+  text-shadow:
+    0 1px 2px rgba(6, 6, 9, 0.75),
+    0 2px 14px rgba(6, 6, 9, 0.65);
+}
+
+/* Soft dark backing so the fixed rail reads over bright film frames. */
+.exp-rail::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -1.4rem -1.6rem -1.4rem -1.4rem;
+  background: radial-gradient(
+    ellipse 75% 62% at 30% 50%,
+    color-mix(in srgb, var(--color-obsidian) 66%, transparent),
+    transparent 78%
+  );
+  pointer-events: none;
 }
 
 .exp-rail-readout {
@@ -131,7 +151,7 @@
 .exp-rail li {
   position: relative;
   z-index: 2;
-  color: color-mix(in srgb, var(--color-bone) 35%, transparent);
+  color: color-mix(in srgb, var(--color-bone) 52%, transparent);
   transition: color 240ms ease;
 }
 
@@ -212,16 +232,35 @@
   z-index: -1;
   inset: 5vh -16vw;
   background: radial-gradient(
-    ellipse 54% 48% at var(--scrim-x, 35%) 52%,
-    color-mix(in srgb, var(--color-obsidian) 69%, transparent),
-    transparent 75%
+    ellipse 66% 58% at var(--scrim-x, 35%) 50%,
+    color-mix(in srgb, var(--color-obsidian) 84%, transparent),
+    color-mix(in srgb, var(--color-obsidian) 40%, transparent) 62%,
+    transparent 82%
   );
   pointer-events: none;
 }
 
+/* Every text-bearing chunk of chrome carries a dark shadow so it stays
+   legible over bright film frames (dawn, print hall, gold coins). */
+.exp-kicker,
+.exp-display,
+.exp-title,
+.exp-body,
+.exp-scroll-cue,
+.exp-instrument-readout dt,
+.exp-instrument-readout dd {
+  text-shadow:
+    0 1px 2px rgba(6, 6, 9, 0.7),
+    0 2px 16px rgba(6, 6, 9, 0.6);
+}
+
 .exp-chapter-inner.align-left {
   margin-right: auto;
-  margin-left: clamp(1.5rem, 13vw, 13rem);
+  /* Floor clears the fixed left rail (edge ≈ 13.25rem) so body text never
+     slides under the year column. Below 900px the rail flips to top-right
+     and the media query re-centers this content, so the floor is desktop-only
+     in effect. */
+  margin-left: clamp(14.75rem, 15vw, 16rem);
 }
 
 .exp-chapter-inner.align-right {
@@ -238,6 +277,15 @@
   text-align: center;
 }
 
+/* Centered content clears the left rail on wide screens, but in the
+   ~901–1100px band the centred column would slide under it — reserve the
+   rail zone there so it re-centres in the space beside the rail. */
+@media (min-width: 901px) and (max-width: 1100px) {
+  .exp-chapter-inner.align-center {
+    padding-left: 13rem;
+  }
+}
+
 .hero {
   min-height: 320vh;
 }
@@ -245,7 +293,7 @@
 .hero-inner {
   max-width: 58rem;
   margin-right: auto;
-  margin-left: clamp(1.5rem, 14vw, 14rem);
+  margin-left: clamp(14.75rem, 15vw, 16rem);
 }
 
 .close-chapter {
@@ -311,7 +359,7 @@
 .exp-body {
   max-width: 34rem;
   margin: 0;
-  color: color-mix(in srgb, var(--color-bone) 82%, transparent);
+  color: color-mix(in srgb, var(--color-bone) 95%, transparent);
   font-size: clamp(0.8rem, 1.05vw, 0.92rem);
   line-height: 1.85;
 }
@@ -351,7 +399,7 @@
 
 .exp-instrument-readout dt {
   margin-bottom: 0.38rem;
-  color: var(--color-bone-dim);
+  color: color-mix(in srgb, var(--color-bone) 80%, transparent);
   font-size: 8px;
   line-height: 1.55;
   letter-spacing: 0.25em;
