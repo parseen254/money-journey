@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import SmoothScroll from './components/SmoothScroll'
 import ScrollVideo from './components/ScrollVideo'
+import ScrollAudio from './components/ScrollAudio'
 import AutoTour from './components/AutoTour'
 import PromptPage from './components/PromptPage'
 import Experience from './experience/Experience'
@@ -14,6 +15,7 @@ export default function App() {
           element={
             <>
               <ScrollVideo src="/media/journey.mp4" />
+              <ScrollAudio />
               <Experience />
               <AutoTour />
             </>

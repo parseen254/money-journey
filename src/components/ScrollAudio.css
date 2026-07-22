@@ -1,0 +1,40 @@
+.scroll-audio {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--color-bone) 22%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-obsidian) 78%, transparent);
+  backdrop-filter: blur(6px);
+  color: var(--color-bone-dim);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.scroll-audio:hover {
+  border-color: color-mix(in srgb, var(--color-amber-bright) 58%, transparent);
+  color: var(--color-amber-bright);
+}
+
+.scroll-audio.is-on {
+  border-color: color-mix(in srgb, var(--color-teal-bright) 58%, transparent);
+  background: color-mix(in srgb, var(--color-teal) 12%, var(--color-obsidian));
+  color: var(--color-teal-bright);
+}
+
+@media (max-width: 640px) {
+  .scroll-audio {
+    right: 0.9rem;
+    bottom: 4.4rem;
+    padding: 0.4rem 0.75rem;
+  }
+}
