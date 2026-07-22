@@ -548,6 +548,14 @@
     transform: none;
   }
 
+  /* The desktop rail backing overhangs to the right (‑1.6rem inset); on the
+     top-right mobile rail that pushes past the viewport edge and causes
+     horizontal overflow. The mobile rail already sits over the dark header
+     scrim, so drop the backing here. */
+  .exp-rail::before {
+    display: none;
+  }
+
   .exp-rail-readout {
     gap: 0.7rem;
     margin: 0;

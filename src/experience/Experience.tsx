@@ -207,7 +207,7 @@ export default function Experience() {
   }
 
   return (
-    <div ref={rootRef} className="experience">
+    <div ref={rootRef} className="experience overflow-x-clip">
       <header className="exp-header">
         <p className="exp-wordmark">
           MKOBA
