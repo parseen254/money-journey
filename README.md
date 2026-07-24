@@ -2,7 +2,7 @@
 
 MKOBA: Money Has Always Moved. A scroll-scrubbed film that runs through 240 years of East African money, from cowrie shells to the open ledger. As you scroll, the story scrubs frame by frame across six chapters.
 
-Live: https://money-journey.vercel.app
+Live: https://mkoba.vercel.app
 
 ## Chapters
 
