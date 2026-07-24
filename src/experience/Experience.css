@@ -131,8 +131,10 @@
 .exp-rail ol::before {
   content: '';
   position: absolute;
-  top: 0;
-  bottom: 0;
+  /* Start/end at the first and last station dots (each at its row's 50%),
+     not the full <ol> box — no line/dot overhang past the endpoints. */
+  top: 0.62rem;
+  bottom: 0.62rem;
   left: 0;
   width: 1px;
   transform-origin: top;
@@ -186,6 +188,26 @@
   color: inherit;
   text-decoration: none;
   white-space: nowrap;
+  /* macOS Dock magnification: the active era swells most, neighbours ease up
+     with distance falloff, so the current station bulges out of the rail as
+     you scroll. Origin left keeps the growth anchored to the timeline. */
+  transform-origin: left center;
+  transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform;
+}
+
+.exp-rail li.is-active a {
+  transform: scale(1.16);
+}
+
+.exp-rail li.is-active + li a,
+.exp-rail li:has(+ li.is-active) a {
+  transform: scale(1.08);
+}
+
+.exp-rail li.is-active + li + li a,
+.exp-rail li:has(+ li + li.is-active) a {
+  transform: scale(1.03);
 }
 
 .exp-rail-idx {
@@ -207,7 +229,9 @@
 
 .exp-chapter {
   position: relative;
-  min-height: 335vh;
+  /* Each era holds ~1.5 screens of scrub: long enough to read the reveal,
+     short enough that the whole film is ~13 screens, not 26. */
+  min-height: 150vh;
 }
 
 .exp-chapter-inner {
@@ -287,7 +311,7 @@
 }
 
 .hero {
-  min-height: 320vh;
+  min-height: 170vh;
 }
 
 .hero-inner {
@@ -297,7 +321,7 @@
 }
 
 .close-chapter {
-  min-height: 260vh;
+  min-height: 150vh;
 }
 
 .close-inner {
@@ -633,15 +657,15 @@
   }
 
   .exp-chapter {
-    min-height: 300vh;
+    min-height: 145vh;
   }
 
   .hero {
-    min-height: 290vh;
+    min-height: 165vh;
   }
 
   .close-chapter {
-    min-height: 230vh;
+    min-height: 150vh;
   }
 
   .exp-chapter-inner,

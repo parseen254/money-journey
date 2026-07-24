@@ -15,8 +15,15 @@ import './Experience.css'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const JOURNEY_START_YEAR = 1780
 const JOURNEY_END_YEAR = 2026
+// The year each era hands off to the next (crypto runs to today). Indexed to
+// ERAS, so the rail readout counts within an era's real span instead of
+// smearing 1780→2026 linearly across equal-height sections.
+const ERA_END_YEARS = [1800, 1921, 1989, 2007, 2020, JOURNEY_END_YEAR]
+// Idle time (ms) after scrolling stops before a proximity snap fires, and how
+// close (fraction of viewport height) a section top must be to snap to it.
+const SNAP_IDLE_MS = 150
+const SNAP_PROXIMITY = 0.4
 const HOLD_DURATION = 1.4
 const FOUNDING_CAP = 10_000
 const FOUNDING_PLACES = 8_412
@@ -45,23 +52,119 @@ export default function Experience() {
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-    const ctx = gsap.context(() => {
-      const renderJourney = (progress: number) => {
-        const year = Math.round(JOURNEY_START_YEAR + progress * (JOURNEY_END_YEAR - JOURNEY_START_YEAR))
-        if (yearRef.current) yearRef.current.textContent = String(year)
+    // Pixel band of each era section, measured on every ScrollTrigger refresh so
+    // the year readout stays correct after layout/resizes. Only the six eras
+    // carry a year range; the hero pins to 1780 and the close to 2026.
+    type Band = { top: number; bottom: number; startYear: number; endYear: number; index: number }
+    let bands: Band[] = []
+    let snapTops: number[] = []
 
-        const activeIndex = Math.min(ERAS.length - 1, Math.floor(progress * ERAS.length))
-        railRef.current?.querySelectorAll('li').forEach((station, index) => {
-          station.classList.toggle('is-active', index === activeIndex)
-        })
+    const measure = () => {
+      bands = ERAS.map((era, i) => {
+        const el = document.getElementById(`ch-${era.id}`)
+        const top = el?.offsetTop ?? 0
+        return {
+          top,
+          bottom: top + (el?.offsetHeight ?? 1),
+          startYear: era.yearStart,
+          endYear: ERA_END_YEARS[i],
+          index: i,
+        }
+      })
+      const stops = [
+        root.querySelector<HTMLElement>('.hero'),
+        ...ERAS.map((era) => document.getElementById(`ch-${era.id}`)),
+        document.getElementById('ch-close'),
+      ]
+      snapTops = stops.filter((el): el is HTMLElement => Boolean(el)).map((el) => el.offsetTop)
+    }
+
+    const setActive = (index: number) => {
+      railRef.current?.querySelectorAll('li').forEach((station, i) => {
+        station.classList.toggle('is-active', i === index)
+      })
+    }
+
+    // Year is anchored to whichever era the viewport centre sits in, and
+    // interpolated across that era's real span — so PAPER reads 1921→1966-ish,
+    // not the ~1878 a linear scroll map produced.
+    const renderReadout = () => {
+      if (!bands.length) return
+      const mid = window.scrollY + window.innerHeight / 2
+      const first = bands[0]
+      const last = bands[bands.length - 1]
+
+      let year: number
+      let index: number
+      // Continuous 0..6 era coordinate (era index + fraction within it), so the
+      // audio beds crossfade on the SAME timeline as the visuals instead of raw
+      // scroll progress, which hero/close and unequal eras throw off.
+      let eraPos: number
+      if (mid <= first.top) {
+        year = first.startYear
+        index = 0
+        eraPos = 0
+      } else if (mid >= last.bottom) {
+        year = last.endYear
+        index = last.index
+        eraPos = ERAS.length
+      } else {
+        const band = bands.find((b) => mid >= b.top && mid < b.bottom)
+        if (band) {
+          const f = Math.min(1, Math.max(0, (mid - band.top) / (band.bottom - band.top)))
+          year = Math.round(band.startYear + f * (band.endYear - band.startYear))
+          index = band.index
+          eraPos = band.index + f
+        } else {
+          // Between two era bands: hold at the era just left behind.
+          const next = bands.find((b) => b.top > mid) ?? last
+          const prev = bands[next.index - 1] ?? first
+          year = prev.endYear
+          index = prev.index
+          eraPos = prev.index + 1
+        }
       }
+      if (yearRef.current) yearRef.current.textContent = String(year)
+      setActive(index)
+      document.documentElement.style.setProperty('--era-pos', eraPos.toFixed(4))
+    }
 
-      renderJourney(0)
+    // Proximity snap driven through Lenis (never GSAP's own scroll tween, which
+    // Lenis would overwrite). Fires only after scrolling idles, and only when a
+    // section top is close — so a reader parked mid-era is never yanked.
+    let snapTimer: ReturnType<typeof setTimeout> | undefined
+    const onScrollSnap = () => {
+      clearTimeout(snapTimer)
+      snapTimer = setTimeout(() => {
+        const y = window.scrollY
+        const reach = window.innerHeight * SNAP_PROXIMITY
+        let best = y
+        let bestDelta = Infinity
+        for (const top of snapTops) {
+          const delta = Math.abs(top - y)
+          if (delta < bestDelta) {
+            bestDelta = delta
+            best = top
+          }
+        }
+        if (bestDelta > 2 && bestDelta < reach) scrollApi().scrollTo(best)
+      }, SNAP_IDLE_MS)
+    }
+
+    const ctx = gsap.context(() => {
+      measure()
+      renderReadout()
       ScrollTrigger.create({
         start: 0,
         end: 'max',
-        onUpdate: (self) => renderJourney(self.progress),
+        onUpdate: renderReadout,
+        onRefresh: () => {
+          measure()
+          renderReadout()
+        },
       })
+
+      if (!reducedMotion) window.addEventListener('scroll', onScrollSnap, { passive: true })
 
       if (reducedMotion) {
         gsap.set('[data-reveal]', { y: 0, opacity: 1 })
@@ -145,6 +248,8 @@ export default function Experience() {
     const refreshFrame = requestAnimationFrame(() => ScrollTrigger.refresh())
     return () => {
       cancelAnimationFrame(refreshFrame)
+      window.removeEventListener('scroll', onScrollSnap)
+      clearTimeout(snapTimer)
       ctx.revert()
     }
   }, [])

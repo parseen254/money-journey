@@ -1,32 +1,37 @@
-# React + TypeScript + Vite
+# money-journey
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+MKOBA: Money Has Always Moved. A scroll-scrubbed film that runs through 240 years of East African money, from cowrie shells to the open ledger. As you scroll, the story scrubs frame by frame across six chapters.
 
-Currently, two official plugins are available:
+Live: https://money-journey.vercel.app
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Chapters
 
-## React Compiler
+Barter, Coin, Paper, Plastic, Mobile, Crypto. Each is its own scene with scroll-linked motion, video, and audio that track the scroll position rather than playing on a fixed timeline.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## How it works
 
-## Expanding the Oxlint configuration
+Scroll drives everything. A smooth-scroll layer feeds a normalized scroll value into GSAP timelines, and the video and audio components seek to the matching point instead of autoplaying. The result reads like a film you scrub with the scrollbar, on desktop and mobile.
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## Stack
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+- React 19 and TypeScript
+- Vite 8 for build and dev
+- GSAP for the scroll-linked timelines
+- Lenis for smooth scroll
+- Tailwind CSS 4
+- Deployed on Vercel
+
+## Run locally
+
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Build:
+
+```bash
+npm run build
+```
+
+The film clips and intermediate build artifacts are generated locally and kept out of git. Clone, install, and run to see the full experience.

@@ -1,5 +1,5 @@
 {
-  "name": "codebase",
+  "name": "money-journey",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -29,5 +29,6 @@
     "oxlint": "^1.71.0",
     "typescript": "~6.0.2",
     "vite": "^8.1.1"
-  }
+  },
+  "description": "MKOBA: a scroll-scrubbed film through 240 years of East African money, from cowrie to open ledger."
 }

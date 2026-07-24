@@ -7,6 +7,11 @@ const ERA_COUNT = 6
 const MASTER_GAIN = 0.6
 const GAIN_SMOOTHING_SECONDS = 0.15
 const SUSPEND_DELAY_MS = 300
+// Once the journey reaches the end of the timeline, hold the last bed briefly
+// then fade the score out — the film is over, the room goes quiet.
+const END_POS = ERA_COUNT - 0.02
+const END_HOLD_MS = 5000
+const END_FADE_SECONDS = 0.8
 const ERA_URLS = Array.from({ length: ERA_COUNT }, (_, index) => `/media/audio/era-${index + 1}.m4a`)
 
 type AudioGraph = {
@@ -16,8 +21,10 @@ type AudioGraph = {
   sources: AudioBufferSourceNode[]
 }
 
-function eraTargets(progress: number) {
-  const x = Math.min(6, Math.max(0, progress * 6))
+function eraTargets(eraPos: number) {
+  // eraPos is already a 0..6 era coordinate (Experience writes --era-pos),
+  // so beds crossfade exactly on the visual timeline.
+  const x = Math.min(ERA_COUNT, Math.max(0, eraPos))
   const weights = Array.from({ length: ERA_COUNT }, (_, index) => {
     const distance = Math.abs(x - (index + 0.5))
     return distance < 0.3 ? 1 : Math.max(0, 1 - distance)
@@ -35,7 +42,10 @@ export default function ScrollAudio() {
   const loadAbortRef = useRef<AbortController | null>(null)
   const suspendTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const warnedRef = useRef(false)
+  // 0..6 era coordinate mirrored from --era-pos (not raw scroll progress).
   const progressRef = useRef(0)
+  const endTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const endedRef = useRef(false)
 
   const warnOnce = useCallback(() => {
     if (warnedRef.current) return
@@ -118,6 +128,12 @@ export default function ScrollAudio() {
       suspendTimerRef.current = null
     }
 
+    if (endTimerRef.current) {
+      clearTimeout(endTimerRef.current)
+      endTimerRef.current = null
+    }
+    endedRef.current = false
+
     if (enabledRef.current) {
       enabledRef.current = false
       setEnabled(false)
@@ -153,15 +169,39 @@ export default function ScrollAudio() {
     let lastRaw = ''
 
     const tick = () => {
-      const raw = getComputedStyle(document.documentElement).getPropertyValue('--journey')
+      const raw = getComputedStyle(document.documentElement).getPropertyValue('--era-pos')
       if (raw !== lastRaw) {
         lastRaw = raw
         const parsed = Number.parseFloat(raw)
-        if (Number.isFinite(parsed)) progressRef.current = Math.min(1, Math.max(0, parsed))
+        if (Number.isFinite(parsed)) progressRef.current = Math.min(ERA_COUNT, Math.max(0, parsed))
       }
 
       const graph = graphRef.current
-      if (graph) applyEraMix(graph, progressRef.current)
+      if (!graph) return
+      applyEraMix(graph, progressRef.current)
+
+      // End of timeline: hold ~5s, then fade out. Scrolling back before the
+      // hold elapses cancels it and brings the score back.
+      if (!enabledRef.current) return
+      const atEnd = progressRef.current >= END_POS
+      if (atEnd) {
+        if (!endedRef.current && !endTimerRef.current) {
+          endTimerRef.current = setTimeout(() => {
+            endTimerRef.current = null
+            endedRef.current = true
+            graph.master.gain.setTargetAtTime(0, graph.context.currentTime, END_FADE_SECONDS)
+          }, END_HOLD_MS)
+        }
+      } else {
+        if (endTimerRef.current) {
+          clearTimeout(endTimerRef.current)
+          endTimerRef.current = null
+        }
+        if (endedRef.current) {
+          endedRef.current = false
+          graph.master.gain.setTargetAtTime(MASTER_GAIN, graph.context.currentTime, GAIN_SMOOTHING_SECONDS)
+        }
+      }
     }
 
     gsap.ticker.add(tick)
@@ -171,6 +211,7 @@ export default function ScrollAudio() {
       gsap.ticker.remove(tick)
       loadAbortRef.current?.abort()
       if (suspendTimerRef.current) clearTimeout(suspendTimerRef.current)
+      if (endTimerRef.current) clearTimeout(endTimerRef.current)
 
       const graph = graphRef.current
       graphRef.current = null
